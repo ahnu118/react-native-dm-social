@@ -177,7 +177,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
                 return;
             }
             String str = new String(sign.getBytes(), "UTF-8");
-            str = URLEncoder.encode(str+gateway, "UTF-8");
+            str = URLEncoder.encode(gateway+str, "UTF-8");
             String url = "alipays://platformapi/startapp?appId=" + this.alipayAppId + "&url=" + str;
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
