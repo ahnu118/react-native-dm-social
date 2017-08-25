@@ -11,12 +11,14 @@ public class DMSocialShareConfig {
     public String wechatAppId;
     public String qqAppId;
     public String sinaAppKey;
+    public String alipayAppId;
 
     private DMSocialShareConfig(final Builder builder) {
         this.context = builder.context;
         this.wechatAppId = builder.wechatAppId;
         this.qqAppId = builder.qqAppId;
         this.sinaAppKey = builder.sinaAppKey;
+        this.alipayAppId = builder.alipayAppId;
     }
 
     public static class Builder {
@@ -24,6 +26,7 @@ public class DMSocialShareConfig {
         private String qqAppId;
         private String sinaAppKey;
         private String wechatAppId;
+        private String alipayAppId;
 
         public Builder(Context context) {
             this.context = context;
@@ -41,6 +44,11 @@ public class DMSocialShareConfig {
 
         public Builder configSina(String appKey) {
             this.sinaAppKey = appKey;
+            return this;
+        }
+
+        public Builder configAlipay(String alipayAppId){
+            this.alipayAppId = alipayAppId;
             return this;
         }
 

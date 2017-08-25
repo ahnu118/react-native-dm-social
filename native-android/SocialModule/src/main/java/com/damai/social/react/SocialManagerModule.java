@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import com.damai.social.pay.PayManager;
 import com.damai.social.pay.alipay.AlipayResultListener;
 import com.damai.social.pay.wx.WXRequestData;
@@ -58,6 +61,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
     private WxPayCallbackBroadCast mBroadCast;
     private Callback mLoginCallback;
     private Callback mShareCallback;
+    private String alipayAppId;
 
     public SocialManagerModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -112,55 +116,54 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
     }
 
     @ReactMethod
-    public void payByWechat(ReadableMap readableMap, final Callback callback) {
+    public void withHoldByAlipay(ReadableMap readableMap, final Callback callback) {
         mCallback = callback;
+        try {
+            String sign = readableMap.getString("sign");
+            if (TextUtils.isEmpty(this.alipayAppId) || TextUtils.isEmpty(sign)) {
+                callback.invoke(null, "Error ! required parameter format error");
+                return;
+            }
+            String str = new String(sign.getBytes(), "UTF-8");
+            str = URLEncoder.encode(str, "UTF-8");
+            String url = "alipays://platformapi/startapp?appId=" + this.alipayAppId + "&url=" + str;
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            getCurrentActivity().startActivity(intent);
+        }catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+        }
+    }
 
-        if (mBroadCast == null) {
-            mBroadCast = new WxPayCallbackBroadCast();
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction("com.damaiapp.pay.wxpay");
-            Activity activity = getCurrentActivity();
 
-            if (activity != null) {
-                activity.registerReceiver(mBroadCast, intentFilter);
+    @ReactMethod
+    public void payByAlipay(ReadableMap signMap, final Callback callback) {
+        String sign = null;
+        if (signMap.hasKey("order")) {
+            sign = signMap.getString("order");
+        }
+
+        if (TextUtils.isEmpty(sign))
+            callback.invoke("sign is null");
+
+        PayManager.getInstance().aliPay(getCurrentActivity(), sign, new AlipayResultListener() {
+
+            @Override
+            public void onSuccess(String orderNo) {
+                WritableMap event = Arguments.createMap();
+                event.putString("message", "支付成功");
+                callback.invoke(event, orderNo);
             }
 
-        }
-
-        if (!readableMap.hasKey("appid") || !readableMap.hasKey("noncestr") || !readableMap.hasKey("package") || !readableMap.hasKey("partnerid")
-                || !readableMap.hasKey("prepayid") || !readableMap.hasKey("timestamp") || !readableMap.hasKey("sign")) {
-
-            callback.invoke(null, "Error ! Miss required parameter");
-            return;
-
-        }
-
-        String appid = readableMap.getString("appid");
-        String noncestr = readableMap.getString("noncestr");
-        String mPackage = readableMap.getString("package");
-        String partnerid = readableMap.getString("partnerid");
-        String prepayid = readableMap.getString("prepayid");
-        int timestamp = readableMap.getInt("timestamp");
-        String sign = readableMap.getString("sign");
-
-        if (TextUtils.isEmpty(appid) || TextUtils.isEmpty(noncestr) || TextUtils.isEmpty(mPackage) || TextUtils.isEmpty(partnerid)
-                || TextUtils.isEmpty(prepayid) || timestamp == 0 || TextUtils.isEmpty(sign)) {
-
-            callback.invoke(null, "Error ! required parameter format error");
-            return;
-        }
-
-        WXRequestData data = new WXRequestData();
-        data.mAppid = appid;
-        data.mNonceStr = noncestr;
-        data.mPackage = mPackage;
-        data.mPartnerid = partnerid;
-        data.mPrepayid = prepayid;
-        data.mTimestamp = timestamp + "";
-        data.mSign = sign;
-
-        PayManager.getInstance().wxPay(getCurrentActivity(), data);
+            @Override
+            public void onFailed(String code) {
+                WritableMap event = Arguments.createMap();
+                event.putString("message", code);
+                callback.invoke(event, code);
+            }
+        });
     }
+
 
     @Override
     public void onHostResume() {
@@ -232,7 +235,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
 
     @ReactMethod
     public void configure(ReadableMap readableMap) {
-        if (!readableMap.hasKey("qqAppId") || !readableMap.hasKey("wechatAppId") || !readableMap.hasKey("weiboAppKey")) {
+        if (!readableMap.hasKey("qqAppId") || !readableMap.hasKey("wechatAppId") || !readableMap.hasKey("weiboAppKey" )) {
             //callback.invoke(null, "Error ! Miss required parameter");
             ToastUtil.toast(getCurrentActivity(),"Error ! Miss required parameter");
             return;
@@ -241,11 +244,13 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         String qqAppId = readableMap.getString("qqAppId");
         String wechatAppId = readableMap.getString("wechatAppId");
         String weiboAppKey = readableMap.getString("weiboAppKey");
-
+        String alipayAppId = readableMap.getString("alipayAppId");
+        this.alipayAppId = alipayAppId;
         DMSocialShareConfig dmSocialShareConfig = new DMSocialShareConfig.Builder(getCurrentActivity())
                 .configQQ(qqAppId)
                 .configWeChat(wechatAppId)
                 .configSina(weiboAppKey)
+                .configAlipay(alipayAppId)
                 .build();
         DMSocialShare.getInstance().init(dmSocialShareConfig);
     }
