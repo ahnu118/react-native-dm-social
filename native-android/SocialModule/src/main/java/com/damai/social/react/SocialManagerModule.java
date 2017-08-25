@@ -114,6 +114,57 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
             }
         });
     }
+    
+    @ReactMethod
+    public void payByWechat(ReadableMap readableMap, final Callback callback) {
+        mCallback = callback;
+
+        if (mBroadCast == null) {
+            mBroadCast = new WxPayCallbackBroadCast();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction("com.damaiapp.pay.wxpay");
+            Activity activity = getCurrentActivity();
+
+            if (activity != null) {
+                activity.registerReceiver(mBroadCast, intentFilter);
+            }
+
+        }
+
+        if (!readableMap.hasKey("appid") || !readableMap.hasKey("noncestr") || !readableMap.hasKey("package") || !readableMap.hasKey("partnerid")
+                || !readableMap.hasKey("prepayid") || !readableMap.hasKey("timestamp") || !readableMap.hasKey("sign")) {
+
+            callback.invoke(null, "Error ! Miss required parameter");
+            return;
+
+        }
+
+        String appid = readableMap.getString("appid");
+        String noncestr = readableMap.getString("noncestr");
+        String mPackage = readableMap.getString("package");
+        String partnerid = readableMap.getString("partnerid");
+        String prepayid = readableMap.getString("prepayid");
+        int timestamp = readableMap.getInt("timestamp");
+        String sign = readableMap.getString("sign");
+
+        if (TextUtils.isEmpty(appid) || TextUtils.isEmpty(noncestr) || TextUtils.isEmpty(mPackage) || TextUtils.isEmpty(partnerid)
+                || TextUtils.isEmpty(prepayid) || timestamp == 0 || TextUtils.isEmpty(sign)) {
+
+            callback.invoke(null, "Error ! required parameter format error");
+            return;
+        }
+
+        WXRequestData data = new WXRequestData();
+        data.mAppid = appid;
+        data.mNonceStr = noncestr;
+        data.mPackage = mPackage;
+        data.mPartnerid = partnerid;
+        data.mPrepayid = prepayid;
+        data.mTimestamp = timestamp + "";
+        data.mSign = sign;
+
+        PayManager.getInstance().wxPay(getCurrentActivity(), data);
+    }
 
     @ReactMethod
     public void withHoldByAlipay(ReadableMap readableMap, final Callback callback) {
