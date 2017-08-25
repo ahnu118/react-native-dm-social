@@ -42,7 +42,7 @@ export default {
     SocialManager.payByWechat(params, callback);
   },
   /**
-  callback: (err, code) => {}
+  callback: (err, code) => {} 代扣服务
   */
   withHoldByAlipay: (params, callback) => {
     SocialManager.withHoldByAlipay(params, callback)
