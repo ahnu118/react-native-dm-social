@@ -171,12 +171,13 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         mCallback = callback;
         try {
             String sign = readableMap.getString("sign");
-            if (TextUtils.isEmpty(this.alipayAppId) || TextUtils.isEmpty(sign)) {
+            String gateway = readableMap.getString("gateway");
+            if (TextUtils.isEmpty(this.alipayAppId) || TextUtils.isEmpty(sign) || TextUtils.isEmpty(gateway)) {
                 callback.invoke(null, "Error ! required parameter format error");
                 return;
             }
             String str = new String(sign.getBytes(), "UTF-8");
-            str = URLEncoder.encode(str, "UTF-8");
+            str = URLEncoder.encode(str+gateway, "UTF-8");
             String url = "alipays://platformapi/startapp?appId=" + this.alipayAppId + "&url=" + str;
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
