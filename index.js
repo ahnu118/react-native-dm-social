@@ -41,8 +41,10 @@ export default {
   payByWechat: (params, callback) => {
     SocialManager.payByWechat(params, callback);
   },
-
-  withHoldByAlipay: (params:Object, callback:()=>void) => {
+  /**
+  callback: (err, code) => {}
+  */
+  withHoldByAlipay: (params, callback) => {
     SocialManager.withHoldByAlipay(params, callback)
   },
 
