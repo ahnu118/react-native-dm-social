@@ -278,21 +278,21 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
     }
 
     @ReactMethod
-    public void authorizeByWechat(ReadableMap readableMap, final Callback callback) {
+    public void authorizeByWechat(final Callback callback) {
         mLoginCallback = callback;
         WechatLoginManager wechatLoginManager = new WechatLoginManager(getCurrentActivity());
         wechatLoginManager.login(platformActionListener);
     }
 
     @ReactMethod
-    public void authorizeByWeibo(ReadableMap readableMap, final Callback callback) {
+    public void authorizeByWeibo(final Callback callback) {
         mLoginCallback = callback;
         WeiboLoginManager weiboLoginManager = new WeiboLoginManager(getCurrentActivity());
         weiboLoginManager.login(platformActionListener);
     }
 
     @ReactMethod
-    public void authorizeByQQ(ReadableMap readableMap, final Callback callback) {
+    public void authorizeByQQ(final Callback callback) {
         mLoginCallback = callback;
         QQLoginManager qqLoginManager = new QQLoginManager(getCurrentActivity());
         qqLoginManager.login(platformActionListener);
@@ -302,7 +302,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         @Override
         public void onComplete(LoginPlatform loginPlatform, HashMap<String, Object> info) {
             if (mLoginCallback != null) {
-                mCallback.invoke(null, "未做处理");
+                mLoginCallback.invoke(null, "未做处理");
             }
         }
 
@@ -311,7 +311,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
             if (mLoginCallback != null) {
                 WritableMap event = Arguments.createMap();
                 event.putString("message", "用户取消登录");
-                mCallback.invoke(event, "用户取消登录");
+                mLoginCallback.invoke(event, "用户取消登录");
             }
         }
 
@@ -320,7 +320,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
             if (mLoginCallback != null) {
                 WritableMap event = Arguments.createMap();
                 event.putString("message", "登录失败");
-                mCallback.invoke(event, "支付失败");
+                mLoginCallback.invoke(event, "支付失败");
             }
         }
     };
