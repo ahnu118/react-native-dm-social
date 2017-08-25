@@ -186,36 +186,6 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         }
     }
 
-
-    @ReactMethod
-    public void payByAlipay(ReadableMap signMap, final Callback callback) {
-        String sign = null;
-        if (signMap.hasKey("order")) {
-            sign = signMap.getString("order");
-        }
-
-        if (TextUtils.isEmpty(sign))
-            callback.invoke("sign is null");
-
-        PayManager.getInstance().aliPay(getCurrentActivity(), sign, new AlipayResultListener() {
-
-            @Override
-            public void onSuccess(String orderNo) {
-                WritableMap event = Arguments.createMap();
-                event.putString("message", "支付成功");
-                callback.invoke(event, orderNo);
-            }
-
-            @Override
-            public void onFailed(String code) {
-                WritableMap event = Arguments.createMap();
-                event.putString("message", code);
-                callback.invoke(event, code);
-            }
-        });
-    }
-
-
     @Override
     public void onHostResume() {
         //Log.e("-------", "onHostResume");
