@@ -144,11 +144,11 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         String mPackage = readableMap.getString("package");
         String partnerid = readableMap.getString("partnerid");
         String prepayid = readableMap.getString("prepayid");
-        int timestamp = readableMap.getInt("timestamp");
+        String timestamp = readableMap.getString("timestamp");
         String sign = readableMap.getString("sign");
 
         if (TextUtils.isEmpty(appid) || TextUtils.isEmpty(noncestr) || TextUtils.isEmpty(mPackage) || TextUtils.isEmpty(partnerid)
-                || TextUtils.isEmpty(prepayid) || timestamp == 0 || TextUtils.isEmpty(sign)) {
+                || TextUtils.isEmpty(prepayid) || TextUtils.isEmpty(timestamp)  || TextUtils.isEmpty(sign)) {
 
             callback.invoke(null, "Error ! required parameter format error");
             return;
@@ -160,7 +160,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         data.mPackage = mPackage;
         data.mPartnerid = partnerid;
         data.mPrepayid = prepayid;
-        data.mTimestamp = timestamp + "";
+        data.mTimestamp = timestamp;
         data.mSign = sign;
 
         PayManager.getInstance().wxPay(getCurrentActivity(), data);
