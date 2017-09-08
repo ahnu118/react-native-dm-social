@@ -190,7 +190,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
     }
 
     @ReactMethod
-    public void startAliAuth(final String sign, final Callback callback) {
+    public void grandAuthAlipay(final String sign, final Callback callback) {
         Runnable authRunnable = new Runnable() {
             @Override
             public void run() {

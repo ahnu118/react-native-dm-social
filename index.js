@@ -48,8 +48,8 @@ export default {
     SocialManager.withHoldByAlipay(params, callback)
   },
 
-  startAliAuth: (sign, callback) => {
-    SocialManager.startAliAuth(sign, callback)
+  grandAuthAlipay: (sign, callback) => {
+    SocialManager.grandAuthAlipay(sign, callback)
   },
   /**
   callback: (err, code) => {}
