@@ -9,7 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
+import android.os.Message;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -48,8 +48,10 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.alipay.sdk.app.AuthTask;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by weijiang on 16/11/16.
@@ -185,6 +187,70 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
         }catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
         }
+    }
+
+    @ReactMethod
+    public void startAliAuth(final String sign, final Callback callback) {
+        Runnable authRunnable = new Runnable() {
+            @Override
+            public void run() {
+                AuthTask authTask = new AuthTask(getCurrentActivity());
+                Map<String, String> result = authTask.authV2(sign, true);
+                if (result == null) {
+                    return;
+                }
+                String resultStatus1="",resultKey="",memo="",alipayOpenId="",authCode="",resultCode="";
+                for (String key : result.keySet()) {
+                    if (TextUtils.equals(key, "resultStatus")) {
+                        resultStatus1 = result.get(key);
+                    } else if (TextUtils.equals(key, "result")) {
+                        resultKey = result.get(key);
+                    } else if (TextUtils.equals(key, "memo")) {
+                        memo = result.get(key);
+                    }
+                }
+
+                String[] resultValue = resultKey.split("&");
+                for (String value : resultValue) {
+                    if (value.startsWith("alipay_open_id")) {
+                        alipayOpenId = removeBrackets(getValue("alipay_open_id=", value), true);
+                        continue;
+                    }
+                    if (value.startsWith("auth_code")) {
+                        authCode = removeBrackets(getValue("auth_code=", value), true);
+                        continue;
+                    }
+                    if (value.startsWith("result_code")) {
+                        resultCode = removeBrackets(getValue("result_code=", value), true);
+                        continue;
+                    }
+                }
+                WritableMap event = Arguments.createMap();
+                event.putString("resultCode", resultCode);
+                event.putString("authCode", authCode);
+                event.putString("resultStatus1", resultStatus1);
+                callback.invoke(event, "用户取消登录");
+            }
+        };
+        Thread authThread = new Thread(authRunnable);
+        authThread.start();
+    }
+
+    private String removeBrackets(String str, boolean remove) {
+        if (remove) {
+            if (!TextUtils.isEmpty(str)) {
+                if (str.startsWith("\"")) {
+                    str = str.replaceFirst("\"", "");
+                }
+                if (str.endsWith("\"")) {
+                    str = str.substring(0, str.length() - 1);
+                }
+            }
+        }
+        return str;
+    }
+    private String getValue(String header, String data) {
+        return data.substring(header.length(), data.length());
     }
 
     @Override
