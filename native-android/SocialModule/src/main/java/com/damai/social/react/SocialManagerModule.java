@@ -197,6 +197,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
                 AuthTask authTask = new AuthTask(getCurrentActivity());
                 Map<String, String> result = authTask.authV2(sign, true);
                 if (result == null) {
+                    callback.invoke("用户取消登录",null);
                     return;
                 }
                 String resultStatus1="",resultKey="",memo="",alipayOpenId="",authCode="",resultCode="";
@@ -229,7 +230,7 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
                 event.putString("resultCode", resultCode);
                 event.putString("authCode", authCode);
                 event.putString("resultStatus1", resultStatus1);
-                callback.invoke(event, "用户取消登录");
+                callback.invoke(null,event);
             }
         };
         Thread authThread = new Thread(authRunnable);
