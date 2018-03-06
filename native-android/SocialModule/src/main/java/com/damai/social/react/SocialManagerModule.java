@@ -368,8 +368,14 @@ public class SocialManagerModule extends ReactContextBaseJavaModule implements L
     private PlatformActionListener platformActionListener = new PlatformActionListener() {
         @Override
         public void onComplete(LoginPlatform loginPlatform, HashMap<String, Object> info) {
+            WritableMap map = Arguments.createMap();
+            for (Map.Entry<String, Object> entry : info.entrySet()) {
+                Object value = entry.getValue();
+                String valueStr = value == null ? "" : value.toString();
+                map.putString(entry.getKey(), valueStr);
+            }
             if (mLoginCallback != null) {
-                mLoginCallback.invoke(null, "未做处理");
+                mLoginCallback.invoke(map, "未做处理");
             }
         }
 
